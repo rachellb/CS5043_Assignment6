@@ -1,0 +1,12 @@
+--hidden
+15
+10
+5
+--dropout
+0.3
+--embedding_length
+4
+--l2
+0.0001
+--epochs
+100
