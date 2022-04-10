@@ -55,7 +55,7 @@ def create_parser():
     # High-level experiment configuration
     parser.add_argument('--exp_type', type=str, default=None, help="Experiment type")
     parser.add_argument('--label', type=str, default=None, help="Extra label to add to output files")
-    parser.add_argument('--dataset', type=str, default='/home/fagg/datasets/hlas',
+    parser.add_argument('--dataset', type=str, default='/home/fagg/datasets/pfam',
                         help='Data set directory')
     parser.add_argument('--allele', type=str, default='1301', help="Allele number to focus on")
     parser.add_argument('--Nfolds', type=int, default=5, help='Maximum number of folds')
@@ -95,7 +95,7 @@ def create_parser():
     parser.add_argument('--patience', type=int, default=100, help="Patience for early termination")
 
     # Training parameters
-    parser.add_argument('--batch', type=int, default=10, help="Training set batch size")
+    parser.add_argument('--batch', type=int, default=64, help="Training set batch size")
     parser.add_argument('--steps_per_epoch', type=int, default=10, help="Number of gradient descent steps per epoch")
     parser.add_argument('--validation_fraction', type=float, default=0.25,
                         help="Fraction of available validation set to actually use for validation")
@@ -159,7 +159,6 @@ def augment_args(args):
     print("Total jobs:", ji.get_njobs())
 
     # Check bounds
-    test = ji.get_njobs()
     assert (args.exp_index >= 0 and args.exp_index < ji.get_njobs()), "exp_index out of range"
 
     # Print the parameters specific to this exp_index
@@ -223,7 +222,7 @@ def generate_fname(args, params_str):
     # learning rate
     lrate_str = "LR_%0.6f_" % args.lrate
 
-    fname = "%s/molecule_%s%s_epochs_%s_hidden_%s_%s%s%s%sntrain_%02d_rot_%02d" % (
+    fname = "%s/amino_%s%s_epochs_%s_hidden_%s_%s%s%s%sntrain_%02d_rot_%02d" % (
         args.results_path,
         experiment_type_str,
         label_str,
@@ -279,21 +278,16 @@ def execute_exp(args=None):
         tf.config.threading.set_inter_op_parallelism_threads(args.cpus_per_task)
     print('Passed configure cpus')
 
-    # TODO: Figure out why tokenizer needs to be kept after everything is trained
-    tokenizer, len_max, n_tokens, ins_train, outs_train, ins_valid, outs_valid, ins_test, outs_test = prepare_data_set(
-        args.exp_index+1, dir_base=args.dataset, allele=args.allele, seed=100, valid_size=args.validation_fraction)
-
-    outs_train = binarize_outputs(outs_train)
-    outs_valid = binarize_outputs(outs_valid)
-    outs_test = binarize_outputs(outs_test)
+    #dat_out = load_rotation(basedir=args.dataset, rotation=args.exp_index)
+    dat_out = prepare_data_set(basedir=args.dataset, rotation=args.exp_index)
 
     # Compute the number of samples in each data set
-    nsamples_train = ins_train.size
-    nsamples_validation = ins_valid.size
-    if ins_test is None:
+    nsamples_train = dat_out['ins_train'].size
+    nsamples_validation = dat_out['ins_valid'].size
+    if dat_out['ins_test'] is None:
         nsamples_testing = 0
     else:
-        nsamples_testing = ins_test.size
+        nsamples_testing = dat_out['ins_test'].size
 
     print("Total samples: Tr:%d, V:%d, Te:%d" % (nsamples_train, nsamples_validation, nsamples_testing))
 
@@ -304,9 +298,10 @@ def execute_exp(args=None):
 
 
 
-    model = create_network(vocab_size=n_tokens,
+    model = create_network(outs=dat_out['outs_train'],
+                           vocab_size=dat_out['n_tokens'],
                            output_dim=args.embedding_length,
-                           len_max=len_max,
+                           len_max=dat_out['len_max'],
                            dense_layers=dense_layers,
                            n_neurons=args.rnnNeurons,
                            activation=args.rnn_activation,
@@ -347,12 +342,12 @@ def execute_exp(args=None):
                                                          min_delta=args.min_delta)
 
 
-    history = model.fit(x=ins_train,
-                        y=outs_train,
+    history = model.fit(x=dat_out['ins_train'],
+                        y=dat_out['outs_train'],
                         epochs=args.epochs,
                         use_multiprocessing=False,
                         verbose=args.verbose >= 2,
-                        validation_data=(ins_valid,outs_valid),
+                        validation_data=(dat_out['ins_valid'], dat_out['outs_valid']),
                         validation_steps=None,
                         callbacks=[early_stopping_cb])
 
@@ -362,15 +357,15 @@ def execute_exp(args=None):
     # Generate results data
     results = {}
     results['args'] = args
-    results['predict_validation'] = model.predict(ins_valid)
-    results['predict_validation_eval'] = model.evaluate(ins_valid, outs_valid)
+    results['predict_validation'] = model.predict(dat_out['ins_valid'])
+    results['predict_validation_eval'] = model.evaluate(dat_out['ins_valid'], dat_out['outs_valid'])
 
-    if ins_test is not None:
-        results['predict_testing'] = model.predict(ins_test)
-        results['predict_testing_eval'] = model.evaluate(ins_test, outs_test)
+    if dat_out['ins_test'] is not None:
+        results['predict_testing'] = model.predict(dat_out['ins_test'])
+        results['predict_testing_eval'] = model.evaluate(dat_out['ins_test'], dat_out['outs_test'])
 
-    results['predict_training'] = model.predict(ins_train)
-    results['predict_training_eval'] = model.evaluate(ins_train, outs_train)
+    results['predict_training'] = model.predict(dat_out['ins_train'])
+    results['predict_training_eval'] = model.evaluate(dat_out['ins_train'], dat_out['outs_train'])
     results['history'] = history.history
     tf.keras.utils.plot_model(model, to_file='%s_model_plot.png' % fbase, show_shapes=True, show_layer_names=True)
 

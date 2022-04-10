@@ -4,10 +4,10 @@ from tensorflow.keras.layers import (Input, Embedding, SimpleRNN, Dense,
 
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.models import Model, Sequential
+import pandas as pd
 
-from metrics_binarized import *
-
-def create_network(vocab_size,
+def create_network(outs,
+                   vocab_size,
                    output_dim,
                    len_max,
                    dense_layers,
@@ -52,11 +52,13 @@ def create_network(vocab_size,
         if dropout:
             model.add(Dropout(rate=dropout))
 
-
-    model.add(Dense(units=1,
+    # Turn into a pandas dataframe in order to use nunique to find appropriate number of output units.
+    outs = pd.DataFrame(outs)
+    model.add(Dense(units=outs.nunique(),
                     use_bias=True,
                     kernel_initializer='random_uniform',
-                    activation='sigmoid',
+                    activation='softmax',
+                    name='Output_layer',
                     kernel_regularizer=lambda_regularization))
 
     # The optimizer determines how the gradient descent is to be done
@@ -64,8 +66,7 @@ def create_network(vocab_size,
                                 epsilon=None, decay=0.0, amsgrad=False)
 
 
-    model.compile(loss='binary_crossentropy', optimizer=opt, metrics=[tf.keras.metrics.BinaryAccuracy(threshold=0.426),
-                                                                      'AUC'])
+    model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['sparse_categorical_accuracy'])
 
 
 
