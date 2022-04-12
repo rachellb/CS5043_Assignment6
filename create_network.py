@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.keras.layers import (Input, Embedding, SimpleRNN, Dense,
+from tensorflow.keras.layers import (Input, Embedding, SimpleRNN, Dense, Conv1D, MaxPool1D,
                                      BatchNormalization, Dropout, Activation)
 
 from tensorflow.keras.regularizers import l2
@@ -31,6 +31,16 @@ def create_network(outs,
     # Output_dim = length of the vector for each word (essentially a hyperparameter)
     # input_length = maximum length of a sequence
     model.add(Embedding(input_dim=vocab_size, output_dim=output_dim, input_length=len_max))
+
+    model.add(Conv1D(filters=64, kernel_size=4, activation='relu'))
+
+    # Pool down to 2
+    model.add(MaxPool1D(pool_size=2, strides=None, padding="valid"))
+
+    model.add(Conv1D(filters=64, kernel_size=4, activation='relu'))
+
+    # Pool down to 2
+    model.add(MaxPool1D(pool_size=2, strides=None, padding="valid"))
 
     model.add(SimpleRNN(n_neurons,
                         activation=activation,
@@ -68,7 +78,6 @@ def create_network(outs,
 
     model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['sparse_categorical_accuracy'])
 
-
-
+    print(model.summary())
 
     return model

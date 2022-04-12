@@ -282,6 +282,8 @@ def execute_exp(args=None):
     dat_out = prepare_data_set(basedir=args.dataset, rotation=args.exp_index)
 
     # Compute the number of samples in each data set
+    # TODO: Find out if this is a problem: calculating size as number of examples by length, not number of examples
+    # Should it be shape?
     nsamples_train = dat_out['ins_train'].size
     nsamples_validation = dat_out['ins_valid'].size
     if dat_out['ins_test'] is None:

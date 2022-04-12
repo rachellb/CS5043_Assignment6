@@ -123,14 +123,14 @@ def prepare_data_set(basedir = '/home/fagg/datasets/pfam', rotation = 0, nfolds 
     for k in dat.keys():
         # Loop over all strings and tokenize
         seq = tokenizer.texts_to_sequences(dat_out['ins_'+k])
-        dat_out['ins_'+k] = pad_sequences(seq, maxlen=len_max)
+        dat_out['ins_'+k] = pad_sequences(seq, maxlen=len_max) # Pad out so all are the same length
 
     n_tokens = np.max(dat_out['ins_train']) + 2
 
     print('outputs...')
     # Loop over all data sets: create tokenizer for output
     tokenizer = keras.preprocessing.text.Tokenizer(filters='\t\n')
-    tokenizer.fit_on_texts(dat_out['outs_train'])
+    tokenizer.fit_on_texts(dat_out['outs_train']) # Essentially turns into label encoding
 
     # Tokenize all of the outputs
     for k in dat.keys():
