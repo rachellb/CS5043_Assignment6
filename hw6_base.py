@@ -343,13 +343,13 @@ def execute_exp(args=None):
                                                          restore_best_weights=True,
                                                          min_delta=args.min_delta)
 
+    dat_train, dat_valid, dat_test = create_tf_datasets(dat_out)
 
-    history = model.fit(x=dat_out['ins_train'],
-                        y=dat_out['outs_train'],
+    history = model.fit(dat_train,
                         epochs=args.epochs,
                         use_multiprocessing=False,
                         verbose=args.verbose >= 2,
-                        validation_data=(dat_out['ins_valid'], dat_out['outs_valid']),
+                        validation_data=(dat_valid),
                         validation_steps=None,
                         callbacks=[early_stopping_cb])
 
@@ -359,15 +359,15 @@ def execute_exp(args=None):
     # Generate results data
     results = {}
     results['args'] = args
-    results['predict_validation'] = model.predict(dat_out['ins_valid'])
-    results['predict_validation_eval'] = model.evaluate(dat_out['ins_valid'], dat_out['outs_valid'])
+    results['predict_validation'] = model.predict(dat_valid)
+    results['predict_validation_eval'] = model.evaluate(dat_out)
 
     if dat_out['ins_test'] is not None:
-        results['predict_testing'] = model.predict(dat_out['ins_test'])
-        results['predict_testing_eval'] = model.evaluate(dat_out['ins_test'], dat_out['outs_test'])
+        results['predict_testing'] = model.predict(dat_test)
+        results['predict_testing_eval'] = model.evaluate(dat_test)
 
-    results['predict_training'] = model.predict(dat_out['ins_train'])
-    results['predict_training_eval'] = model.evaluate(dat_out['ins_train'], dat_out['outs_train'])
+    results['predict_training'] = model.predict(dat_train)
+    results['predict_training_eval'] = model.evaluate(dat_train)
     results['history'] = history.history
     tf.keras.utils.plot_model(model, to_file='%s_model_plot.png' % fbase, show_shapes=True, show_layer_names=True)
 

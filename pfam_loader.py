@@ -188,3 +188,28 @@ def load_rotation(basedir = '/home/fagg/datasets/pfam', rotation=0):
         dat_out = pickle.load(fp)
         return dat_out
     return None
+
+def create_tf_datasets(dat, batch=8, prefetch=None):
+    '''
+    Translate the data structure from load_rotation() or prepare_data_set() into a proper TF DataSet object
+    for each of training, validation and testing.  These act as configurable generators that can be used by
+    model.fit(), .predict() and .evaluate()
+
+    :param dat: Data structure from load_rotation() or prepare_data_set()
+    :param batch: Batch size (int)
+    :param prefetch: Number of batches to prefetch.  (None = no prefetch)
+
+    '''
+
+    # Translate tensors into datasets
+    dataset_train = tf.data.Dataset.from_tensor_slices((dat['ins_train'], dat['outs_train'])).batch(batch)
+    dataset_valid = tf.data.Dataset.from_tensor_slices((dat['ins_valid'], dat['outs_valid'])).batch(batch)
+    dataset_test = tf.data.Dataset.from_tensor_slices((dat['ins_test'], dat['outs_test'])).batch(batch)
+
+    # Prefetch if specified
+    if prefetch is not None:
+        dataset_train = dataset_train.prefetch(prefetch)
+        dataset_valid = dataset_valid.prefetch(prefetch)
+        dataset_test = dataset_test.prefetch(prefetch)
+
+    return dataset_train, dataset_valid, dataset_test

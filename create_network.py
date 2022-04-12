@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.keras.layers import (Input, Embedding, SimpleRNN, Dense, Conv1D, MaxPool1D,
+from tensorflow.keras.layers import (Input, Embedding, SimpleRNN, Dense, Conv1D, MaxPool1D, LSTM,
                                      BatchNormalization, Dropout, Activation)
 
 from tensorflow.keras.regularizers import l2
@@ -42,13 +42,13 @@ def create_network(outs,
     # Pool down to 2
     model.add(MaxPool1D(pool_size=2, strides=None, padding="valid"))
 
-    model.add(SimpleRNN(n_neurons,
+    model.add(LSTM(n_neurons,
                         activation=activation,
                         use_bias=True,
                         return_sequences=False, # Produce entire sequence of outputs
                         kernel_initializer='random_uniform',
                         kernel_regularizer=lambda_regularization,
-                        unroll=True)) # Laying this out on the GPU.
+                        unroll=False)) # Laying this out on the GPU.
                                       # Different timesteps can get allocated to different parts of GPU
                                       # Runs really fast if enough space on GPU
 
