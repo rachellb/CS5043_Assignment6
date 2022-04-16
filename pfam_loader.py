@@ -53,7 +53,7 @@ def load_pfam_dataset(basedir = '/home/fagg/datasets/pfam', rotation = 0, nfolds
     :return: Dictionary containing the DataFrames
     '''
 
-    train_folds = (np.arange(ntrain_folds) + rotation)  % nfolds
+    train_folds = (np.arange(ntrain_folds) + rotation) % nfolds
     valid_folds = (np.array([ntrain_folds]) + rotation) % nfolds
     test_folds = (np.array([ntrain_folds]) + 1 + rotation) % nfolds
 
@@ -116,7 +116,7 @@ def prepare_data_set(basedir = '/home/fagg/datasets/pfam', rotation = 0, nfolds 
     # Convert strings to lists of indices
     tokenizer = keras.preprocessing.text.Tokenizer(char_level=True,
                                                    filters='\t\n')
-    tokenizer.fit_on_texts(dat_out['ins_train'])
+    tokenizer.fit_on_texts(dat_out['ins_train']) # Fit the tokenizer on the training data
 
     print('tokenize...')
     # Loop over all data sets

@@ -32,18 +32,11 @@ def create_network(outs,
     # input_length = maximum length of a sequence
     model.add(Embedding(input_dim=vocab_size, output_dim=output_dim, input_length=len_max))
 
-    model.add(Conv1D(filters=64, kernel_size=4, activation='relu'))
+    model.add(Conv1D(filters=64, kernel_size=25, activation='relu'))
 
-    # Pool down to 2
-    model.add(MaxPool1D(pool_size=2, strides=None, padding="valid"))
-
-    model.add(Conv1D(filters=64, kernel_size=4, activation='relu'))
-
-    # Pool down to 2
-    model.add(MaxPool1D(pool_size=2, strides=None, padding="valid"))
 
     model.add(LSTM(n_neurons,
-                        activation=activation,
+                        activation='tanh',
                         use_bias=True,
                         return_sequences=False, # Produce entire sequence of outputs
                         kernel_initializer='random_uniform',
