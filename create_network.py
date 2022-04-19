@@ -75,7 +75,6 @@ def create_network(outs,
 
     model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['sparse_categorical_accuracy'])
 
-    print(model.summary())
 
     return model
 
