@@ -384,7 +384,7 @@ def execute_exp(args=None):
         pickle.dump(results, fp)
 
     # Save model
-    #model.save("%s_model" % (fbase))
+    model.save("%s_model" % (fbase))
 
     print(fbase)
 
