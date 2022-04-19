@@ -5,9 +5,13 @@
 --dropout
 0.2
 --embedding_length
-15
+4
 --l2
 0.0001
 --epochs
 50
 --gpu
+--rnnNeurons
+30
+--batch
+64

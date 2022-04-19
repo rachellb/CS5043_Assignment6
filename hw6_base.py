@@ -241,17 +241,10 @@ def generate_fname(args, params_str):
 
     # Replace all but the first dot with a dash
     fnameNew = fname[0] + fname[1:].replace(".", "-")
-    # fname = fname.replace(".", "DOT")
+    #fname = fname.replace(".", "DOT")
 
     # Put it all together, including #of training folds and the experiment rotation
-    return fname
-
-# Function to binarize all the outputs, takes in outputs and a given threshold, and returns outputs as 0 or 1
-def binarize_outputs(outs, threshold=0.426):
-
-    # Where outputs are greater or equal to the threshold, set to 1, otherwise set to 0
-    outs = np.where(outs >= threshold, 1, 0)
-    return outs
+    return fnameNew
 
 #################################################################
 def execute_exp(args=None):

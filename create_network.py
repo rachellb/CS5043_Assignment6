@@ -33,6 +33,7 @@ def create_network(outs,
     model.add(Embedding(input_dim=vocab_size, output_dim=output_dim, input_length=len_max))
 
     model.add(Conv1D(filters=64, kernel_size=25, activation='relu', strides=2, padding='same'))
+
     """
     model.add(LSTM(n_neurons,
                    activation='tanh',
@@ -44,11 +45,8 @@ def create_network(outs,
     # Different timesteps can get allocated to different parts of GPU
     # Runs really fast if enough space on GPU
     """
-    model.add(GRU(n_neurons, dropout=dropout, recurrent_dropout=r_drop))
-    #model.add(GRU(n_neurons, dropout=dropout, recurrent_dropout=r_drop))
 
-    #TODO: Figure out if this improves results or speed
-    #model.add(MaxPool1D())
+    model.add(GRU(n_neurons, dropout=dropout, recurrent_dropout=r_drop))
 
     for i in range(len(dense_layers)):
         model.add(Dense(units=dense_layers[i]['units'],

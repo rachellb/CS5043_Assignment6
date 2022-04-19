@@ -9,4 +9,8 @@
 --epochs
 1
 --batch
-1000
+64
+--rnnNeurons
+30
+--label
+30nodes
