@@ -76,7 +76,11 @@ def create_parser():
                         help='Length of embedding vector')
     parser.add_argument('--rnnNeurons', type=int, default=10, help='Number of neurons in RNN module')
     parser.add_argument('--rnn_activation', type=str, default=None, help='Activation of RNN layers')
+    parser.add_argument('--r_drop', type=float, default=0.0, help='Recurrent Dropout')
 
+    # CNN parameters
+    parser.add_argument('--filters', nargs='+', type=int, default=[64],
+                        help='Number of filters per 1D-CNN')
 
     # Hidden unit parameters
     parser.add_argument('--hidden', nargs='+', type=int, default=[100, 5],
@@ -278,8 +282,8 @@ def execute_exp(args=None):
         tf.config.threading.set_inter_op_parallelism_threads(args.cpus_per_task)
     print('Passed configure cpus')
 
-    #dat_out = load_rotation(basedir=args.dataset, rotation=args.exp_index)
-    dat_out = prepare_data_set(basedir=args.dataset, rotation=args.exp_index)
+    dat_out = load_rotation(basedir=args.dataset, rotation=args.exp_index)
+    #dat_out = prepare_data_set(basedir=args.dataset, rotation=args.exp_index)
 
     # Compute the number of samples in each data set
     nsamples_train = dat_out['ins_train'].size
@@ -309,6 +313,7 @@ def execute_exp(args=None):
                            lambda_regularization=None,
                            use_gru=False,
                            dropout=args.dropout,
+                           r_drop=args.r_drop,
                            lrate=args.lrate)
 
     # Report model structure if verbosity is turned on

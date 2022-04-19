@@ -3,7 +3,7 @@
 10
 5
 --dropout
-0.3
+0.2
 --embedding_length
 15
 --l2

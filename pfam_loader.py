@@ -109,9 +109,6 @@ def prepare_data_set(basedir = '/home/fagg/datasets/pfam', rotation = 0, nfolds 
     # Compute max length: only defined with respect to the training set
     len_max = np.max(np.array([len(s) for s in dat_out['ins_train']]))
 
-    # TODO: Remove once testing complete
-    test = pd.DataFrame(dat_out['outs_test'])
-
     print('tokenize fit...')
     # Convert strings to lists of indices
     tokenizer = keras.preprocessing.text.Tokenizer(char_level=True,
